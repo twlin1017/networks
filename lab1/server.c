@@ -88,7 +88,7 @@ int main(int argc, char ** argv)
     if (strcmp(buf, (char*)"ftp") == 0 ){
         sendto(sockfd, (char*)"yes", strlen((char*)"yes"), 0, (struct sockaddr *)&their_addr, addr_len);
     } else {
-        sendto(sockfd, (char*)"yes", strlen((char*)"yes"), 0, (struct sockaddr *)&their_addr, addr_len);
+        sendto(sockfd, (char*)"no", strlen((char*)"no"), 0, (struct sockaddr *)&their_addr, addr_len);
     }
 
 	close(sockfd);
