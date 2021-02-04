@@ -1,5 +1,10 @@
 /*
-** server.c -- 
+** server.c -- Opens a UDP socket on the specified port and waits for
+			   a message from the client. If the client sends the
+			   message "ftp" respond with "yes", otherwise respond
+			   with "no"
+			   Sample code retrieved from Beej's Guide to Network
+			   Programming
 */
 
 #include <stdio.h>
@@ -14,9 +19,9 @@
 #include <netdb.h>
 
 
-#define MAXBUFLEN 100
+#define MAXBUFLEN 100	//Maximum length of the message recieved
 
-// get sockaddr, IPv4 or IPv6:
+// get sockaddr, IPv4 or IPv6 (function taken from Beej's):
 void *get_in_addr(struct sockaddr *sa)
 {
 	if (sa->sa_family == AF_INET) {
@@ -36,11 +41,16 @@ int main(int argc, char ** argv)
 	char buf[MAXBUFLEN];
 	socklen_t addr_len;
 	char s[INET6_ADDRSTRLEN];
+
+	if (argc != 2){
+		printf("Invalid arguments: server <port number>\n");
+		return 0;
+	}
     char *MYPORT = argv[1];
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
-	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_socktype = SOCK_DGRAM;	//datagram socket
 	hints.ai_flags = AI_PASSIVE; // use my IP
 
 	if ((rv = getaddrinfo(NULL, MYPORT, &hints, &servinfo)) != 0) {
@@ -50,8 +60,7 @@ int main(int argc, char ** argv)
 
 	// loop through all the results and bind to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
-		if ((sockfd = socket(p->ai_family, p->ai_socktype,
-				p->ai_protocol)) == -1) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
 			perror("listener: socket");
 			continue;
 		}
@@ -85,10 +94,11 @@ int main(int argc, char ** argv)
 	buf[numbytes] = '\0';
 	printf("listener: packet contains \"%s\"\n", buf);
 
+	//Check if the message recieved by the client is "ftp"
     if (strcmp(buf, (char*)"ftp") == 0 ){
-        sendto(sockfd, (char*)"yes", strlen((char*)"yes"), 0, (struct sockaddr *)&their_addr, addr_len);
+        sendto(sockfd, (char*)"yes", strlen((char*)"yes"), 0, (struct sockaddr *)&their_addr, addr_len);	//Respond yes
     } else {
-        sendto(sockfd, (char*)"no", strlen((char*)"no"), 0, (struct sockaddr *)&their_addr, addr_len);
+        sendto(sockfd, (char*)"no", strlen((char*)"no"), 0, (struct sockaddr *)&their_addr, addr_len);		//Respond no
     }
 
 	close(sockfd);
